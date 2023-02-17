@@ -10,6 +10,8 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/recipesRowLayout"
+        onRecipeClickListener="@{result}"
         android:layout_width="match_parent"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
@@ -68,6 +70,7 @@
                     android:ellipsize="end"
                     android:maxLines="3"
                     android:text="@{result.summary}"
+                    parseHtml="@{result.summary}"
                     android:textColor="@color/black"
                     app:layout_constraintEnd_toEndOf="@+id/txtTitle"
                     app:layout_constraintStart_toStartOf="@+id/txtTitle"
