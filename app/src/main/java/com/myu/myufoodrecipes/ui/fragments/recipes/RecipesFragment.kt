@@ -1,6 +1,7 @@
 package com.myu.myufoodrecipes.ui.fragments.recipes
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -8,32 +9,67 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.myu.myufoodrecipes.MainViewModel
 import com.myu.myufoodrecipes.adapter.RecipesAdapter
 import com.myu.myufoodrecipes.databinding.FragmentRecipesBinding
-import com.myu.myufoodrecipes.util.Constants.Companion.API_KEY
 import com.myu.myufoodrecipes.util.NetworkResult
+import com.myu.myufoodrecipes.util.observeOnce
+import com.myu.myufoodrecipes.viewmodels.MainViewModel
+import com.myu.myufoodrecipes.viewmodels.RecipesViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class RecipesFragment : Fragment() {
     private lateinit var mainViewModel : MainViewModel
+    private lateinit var recipesViewModel : RecipesViewModel
     private val mAdapter by lazy { RecipesAdapter() }
     private var _binding : FragmentRecipesBinding? = null
     private val binding get() = _binding!!
+    private val TAG = "RecipesFragment"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+        recipesViewModel = ViewModelProvider(requireActivity())[RecipesViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRecipesBinding.inflate(inflater, container, false)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+        binding.lifecycleOwner = this
+        binding.mainViewModel = mainViewModel
+
         setupRecyclerView()
-        requestApiData()
+        readDatabase()
 
         return binding.root
+    }
+
+
+    private fun setupRecyclerView(){
+        binding.recyclerView.adapter = mAdapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        showShimmerEffect()
+    }
+
+    private fun readDatabase() {
+       lifecycleScope.launch {
+           mainViewModel.readRecipes.observeOnce(viewLifecycleOwner) { database ->
+               if (database.isNotEmpty()) {
+                   Log.d(TAG, "readDatabase: ")
+                   mAdapter.setData(database.get(0).foodRecipe)
+                   hideShimmerEffect()
+               } else {
+                   requestApiData()
+               }
+           }
+       }
     }
 
     override fun onDestroyView() {
@@ -41,8 +77,9 @@ class RecipesFragment : Fragment() {
         _binding = null
     }
 
-    private fun requestApiData(){
-        mainViewModel.getRecipes(applyQueries())
+    private fun  requestApiData(){
+        Log.d(TAG, "requestApiData: ")
+        mainViewModel.getRecipes(recipesViewModel.applyQueries())
         mainViewModel.recipesResponse.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is NetworkResult.Success -> {
@@ -53,6 +90,7 @@ class RecipesFragment : Fragment() {
                 }
                 is NetworkResult.Error -> {
                     hideShimmerEffect()
+                    loadDataFromCache()
                     Toast.makeText(
                         requireContext(),
                         response.message.toString(),
@@ -66,23 +104,14 @@ class RecipesFragment : Fragment() {
         }
     }
 
-    private fun applyQueries() : HashMap<String,String> {
-
-        val queries : HashMap<String,String> = HashMap()
-        queries["number"] = "50"
-        queries["apiKey"] = API_KEY
-        queries["type"] = "snack"
-        queries["diet"] = "vegan"
-        queries["addRecipeInformation"] = "true"
-        queries["fillIngredients"] = "true"
-
-        return queries
-    }
-
-    private fun setupRecyclerView(){
-        binding.recyclerView.adapter = mAdapter
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        showShimmerEffect()
+    private  fun loadDataFromCache(){
+        lifecycleScope.launch{
+            mainViewModel.readRecipes.observeOnce(viewLifecycleOwner, Observer { database ->
+                if (database.isNotEmpty()) {
+                    mAdapter.setData(database[0].foodRecipe)
+                }
+            })
+        }
     }
 
     private fun showShimmerEffect() {
