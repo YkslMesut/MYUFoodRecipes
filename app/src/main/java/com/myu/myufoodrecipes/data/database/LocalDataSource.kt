@@ -1,7 +1,5 @@
-package com.myu.myufoodrecipes.data
+package com.myu.myufoodrecipes.data.database
 
-import com.myu.myufoodrecipes.data.database.RecipesDao
-import com.myu.myufoodrecipes.data.database.RecipesEntity
 import javax.inject.Inject
 
 class LocalDataSource @Inject constructor(

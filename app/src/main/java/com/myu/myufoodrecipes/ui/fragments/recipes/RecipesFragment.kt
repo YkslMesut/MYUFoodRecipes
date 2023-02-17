@@ -9,10 +9,10 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.myu.myufoodrecipes.R
 import com.myu.myufoodrecipes.adapter.RecipesAdapter
@@ -26,6 +26,8 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class RecipesFragment : Fragment() {
+    private val args by navArgs<RecipesFragmentArgs>()
+
     private lateinit var mainViewModel : MainViewModel
     private lateinit var recipesViewModel : RecipesViewModel
     private val mAdapter by lazy { RecipesAdapter() }
@@ -67,8 +69,7 @@ class RecipesFragment : Fragment() {
     private fun readDatabase() {
        lifecycleScope.launch {
            mainViewModel.readRecipes.observeOnce(viewLifecycleOwner) { database ->
-               if (database.isNotEmpty()) {
-                   Log.d(TAG, "readDatabase: ")
+               if (database.isNotEmpty() && !args.backFromBottomSheet) {
                    mAdapter.setData(database.get(0).foodRecipe)
                    hideShimmerEffect()
                } else {
