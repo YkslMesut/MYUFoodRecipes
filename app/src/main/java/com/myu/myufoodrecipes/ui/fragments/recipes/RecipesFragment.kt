@@ -12,7 +12,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.myu.myufoodrecipes.R
 import com.myu.myufoodrecipes.adapter.RecipesAdapter
 import com.myu.myufoodrecipes.databinding.FragmentRecipesBinding
 import com.myu.myufoodrecipes.util.NetworkResult
@@ -46,6 +48,10 @@ class RecipesFragment : Fragment() {
         binding.mainViewModel = mainViewModel
 
         setupRecyclerView()
+
+        binding.recipesFab.setOnClickListener {
+            findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+        }
         readDatabase()
 
         return binding.root
@@ -106,11 +112,11 @@ class RecipesFragment : Fragment() {
 
     private  fun loadDataFromCache(){
         lifecycleScope.launch{
-            mainViewModel.readRecipes.observeOnce(viewLifecycleOwner, Observer { database ->
+            mainViewModel.readRecipes.observeOnce(viewLifecycleOwner) { database ->
                 if (database.isNotEmpty()) {
                     mAdapter.setData(database[0].foodRecipe)
                 }
-            })
+            }
         }
     }
 
