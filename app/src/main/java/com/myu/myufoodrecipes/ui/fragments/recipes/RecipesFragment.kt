@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.myu.myufoodrecipes.R
 import com.myu.myufoodrecipes.adapter.RecipesAdapter
 import com.myu.myufoodrecipes.databinding.FragmentRecipesBinding
+import com.myu.myufoodrecipes.util.NetworkListener
 import com.myu.myufoodrecipes.util.NetworkResult
 import com.myu.myufoodrecipes.util.observeOnce
 import com.myu.myufoodrecipes.viewmodels.MainViewModel
@@ -27,9 +28,9 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class RecipesFragment : Fragment() {
     private val args by navArgs<RecipesFragmentArgs>()
-
     private lateinit var mainViewModel : MainViewModel
     private lateinit var recipesViewModel : RecipesViewModel
+    private lateinit var networkListener: NetworkListener
     private val mAdapter by lazy { RecipesAdapter() }
     private var _binding : FragmentRecipesBinding? = null
     private val binding get() = _binding!!
@@ -50,11 +51,27 @@ class RecipesFragment : Fragment() {
         binding.mainViewModel = mainViewModel
 
         setupRecyclerView()
+        recipesViewModel.readBackOnline.observe(viewLifecycleOwner) {
+            recipesViewModel.backOnline = it
+        }
 
         binding.recipesFab.setOnClickListener {
-            findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+            if (recipesViewModel.networkStatus) {
+                findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+            } else {
+                recipesViewModel.showNetworkStatus()
+            }
         }
-        readDatabase()
+
+        lifecycleScope.launch{
+            networkListener = NetworkListener()
+            networkListener.checkNetworkAvailability(requireContext())
+                .collect{ status ->
+                    recipesViewModel.networkStatus = status
+                    recipesViewModel.showNetworkStatus()
+                    readDatabase()
+                }
+        }
 
         return binding.root
     }

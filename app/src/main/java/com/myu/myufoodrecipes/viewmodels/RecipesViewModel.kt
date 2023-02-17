@@ -1,7 +1,9 @@
 package com.myu.myufoodrecipes.viewmodels
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.myu.myufoodrecipes.data.DataStoreRepository
 import com.myu.myufoodrecipes.util.Constants
@@ -27,7 +29,15 @@ private val dataStoreRepository: DataStoreRepository) : AndroidViewModel(applica
     private var mealType = DEFAULT_MEAL_TYPE
     private var dietType = DEFAULT_DIET_TYPE
 
+    var networkStatus = false
+    var backOnline = false
+
     val readMealAndDietType = dataStoreRepository.readMealAndDietType
+    val readBackOnline = dataStoreRepository.readBackOnline.asLiveData()
+
+    fun saveBackOnline(backOnline : Boolean) = viewModelScope.launch {
+        dataStoreRepository.saveBackOnline(backOnline)
+    }
 
     fun saveMealAndDietType(
         mealType : String,
@@ -58,5 +68,19 @@ private val dataStoreRepository: DataStoreRepository) : AndroidViewModel(applica
         queries[QUERY_FILL_INGREDIENTS] = "true"
 
         return queries
+    }
+
+    fun showNetworkStatus(){
+        if (!networkStatus) {
+            Toast.makeText(getApplication(),"No Internet Connection",Toast.LENGTH_LONG).show()
+            saveBackOnline(true)
+        } else if (networkStatus) {
+            if (backOnline) {
+                Toast.makeText(getApplication(),"We're back online", Toast.LENGTH_LONG).show()
+                saveBackOnline(false)
+            }
+        }
+
+
     }
 }
