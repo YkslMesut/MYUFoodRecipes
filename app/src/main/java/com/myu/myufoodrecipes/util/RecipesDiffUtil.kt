@@ -2,11 +2,11 @@ package com.myu.myufoodrecipes.util
 
 import androidx.recyclerview.widget.DiffUtil
 
-class RecipesDiffUtil (
-    private val oldList : List<com.myu.myufoodrecipes.models.Result>,
-    private val newList : List<com.myu.myufoodrecipes.models.Result>
-        ) : DiffUtil.Callback() {
 
+class RecipesDiffUtil<T>(
+    private val oldList: List<T>,
+    private val newList: List<T>
+): DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldList.size
     }
@@ -16,12 +16,10 @@ class RecipesDiffUtil (
     }
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition] == newList[newItemPosition]
+        return oldList[oldItemPosition] === newList[newItemPosition]
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition] == newList[oldItemPosition]
-
+        return oldList[oldItemPosition] == newList[newItemPosition]
     }
-
 }

@@ -1,7 +1,6 @@
 package com.myu.myufoodrecipes.ui.fragments.recipes
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -11,7 +10,6 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -121,7 +119,6 @@ class RecipesFragment : Fragment(),SearchView.OnQueryTextListener {
     }
 
     private fun  requestApiData(){
-        Log.d(TAG, "requestApiData: ")
         mainViewModel.getRecipes(recipesViewModel.applyQueries())
         mainViewModel.recipesResponse.observe(viewLifecycleOwner) { response ->
             when (response) {
