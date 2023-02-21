@@ -8,7 +8,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/recipesRowLayout"
+        android:id="@+id/favroiteRecipesRowLayout"
         android:layout_width="match_parent"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
