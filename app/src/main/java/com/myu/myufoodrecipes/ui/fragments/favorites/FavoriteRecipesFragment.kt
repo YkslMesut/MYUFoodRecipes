@@ -1,6 +1,6 @@
 package com.myu.myufoodrecipes.ui.fragments.favorites
 
-import android.os.Bundle
+ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,11 +27,10 @@ class  FavoriteRecipesFragment : Fragment() {
     ): View {
     // Inflate the layout for this fragment
         _binding = FragmentFavoriteRecipesBinding.inflate(inflater, container, false)
-
+        binding.lifecycleOwner = this
+        binding.mainViewModel = mainViewModel
+        binding.mAdapter = mAdapter
         setupRecyclerView(binding.favoriteRecipesRecyclerView)
-        mainViewModel.readFavoriteRecipes.observe(viewLifecycleOwner) { favoritesEntitiy ->
-            mAdapter.setData(favoritesEntitiy)
-        }
 
         return binding.root
     }
