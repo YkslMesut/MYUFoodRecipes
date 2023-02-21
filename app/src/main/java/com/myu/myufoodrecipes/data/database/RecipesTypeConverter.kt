@@ -19,5 +19,14 @@ class RecipesTypeConverter {
         return gson.fromJson(data,listType)
     }
 
+    @TypeConverter
+    fun resultToString(result: com.myu.myufoodrecipes.models.Result) : String {
+        return gson.toJson(result)
+    }
 
+    @TypeConverter
+    fun stringToResult(data : String) : com.myu.myufoodrecipes.models.Result {
+        val listType = object : TypeToken<com.myu.myufoodrecipes.models.Result>() {}.type
+        return gson.fromJson(data,listType)
+    }
 }

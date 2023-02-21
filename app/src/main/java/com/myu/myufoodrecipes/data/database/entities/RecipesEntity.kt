@@ -1,4 +1,4 @@
-package com.myu.myufoodrecipes.data.database
+package com.myu.myufoodrecipes.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

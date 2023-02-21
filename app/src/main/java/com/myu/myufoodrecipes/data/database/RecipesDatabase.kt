@@ -3,9 +3,11 @@ package com.myu.myufoodrecipes.data.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.myu.myufoodrecipes.data.database.entities.FavoritesEntity
+import com.myu.myufoodrecipes.data.database.entities.RecipesEntity
 
 @Database(
-    entities = [RecipesEntity::class],
+    entities = [RecipesEntity::class,FavoritesEntity::class],
     version = 1,
     exportSchema = false
 )
