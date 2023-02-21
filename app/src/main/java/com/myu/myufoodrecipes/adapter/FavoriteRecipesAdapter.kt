@@ -6,15 +6,26 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.myu.myufoodrecipes.R
 import com.myu.myufoodrecipes.data.database.entities.FavoritesEntity
 import com.myu.myufoodrecipes.databinding.FavoriteRecipesRowLayoutBinding
 import com.myu.myufoodrecipes.ui.fragments.favorites.FavoriteRecipesFragmentDirections
 import com.myu.myufoodrecipes.util.RecipesDiffUtil
+import com.myu.myufoodrecipes.viewmodels.MainViewModel
 
 class FavoriteRecipesAdapter(
-    private val requiredActivity : FragmentActivity
+    private val requiredActivity : FragmentActivity,
+    private val mainViewModel : MainViewModel
 ) : RecyclerView.Adapter<FavoriteRecipesAdapter.MyViewHolder>(),ActionMode.Callback {
+
+    private var multiSelection = false
+
+    private lateinit var mActionMode : ActionMode
+    private lateinit var rootView : View
+
+    private var myViewHolder = arrayListOf<MyViewHolder>()
+    private var selectedRecipes = arrayListOf<FavoritesEntity>()
     private var favoriteRecipes = emptyList<FavoritesEntity>()
 
     class MyViewHolder(
@@ -41,8 +52,11 @@ class FavoriteRecipesAdapter(
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val selectedRecipe = favoriteRecipes[position]
-        holder.bind(selectedRecipe)
+        myViewHolder.add(holder)
+        rootView = holder.itemView.rootView
+
+        val currentRecipe = favoriteRecipes[position]
+        holder.bind(currentRecipe)
 
 
         /**
@@ -50,8 +64,14 @@ class FavoriteRecipesAdapter(
          * */
 
         holder.binding.favroiteRecipesRowLayout.setOnClickListener {
-            val action = FavoriteRecipesFragmentDirections.actionFavoriteRecipesFragmentToDetailsActivity(selectedRecipe.result)
-            holder.itemView.findNavController().navigate(action)
+            if (multiSelection) {
+                applySelection(holder,currentRecipe)
+            } else{
+                val action =
+                    FavoriteRecipesFragmentDirections.actionFavoriteRecipesFragmentToDetailsActivity(currentRecipe.result)
+                holder.itemView.findNavController().navigate(action)
+            }
+
         }
 
         /**
@@ -59,8 +79,16 @@ class FavoriteRecipesAdapter(
          * */
 
         holder.binding.favroiteRecipesRowLayout.setOnLongClickListener {
-            requiredActivity.startActionMode(this)
-            true
+            if (!multiSelection) {
+                multiSelection = true
+                requiredActivity.startActionMode(this)
+                applySelection(holder,currentRecipe)
+                true
+            } else {
+                multiSelection = false
+                false
+            }
+
         }
 
     }
@@ -69,9 +97,43 @@ class FavoriteRecipesAdapter(
        return favoriteRecipes.size
     }
 
+    private fun applySelection(holder : MyViewHolder , currentRecipe : FavoritesEntity) {
+        if (selectedRecipes.contains(currentRecipe)) {
+            selectedRecipes.remove(currentRecipe)
+            changeRecipeStyle(holder,R.color.cardBackgroundColor,R.color.strokeColor)
+            applyActionModeTitle()
+        } else {
+            selectedRecipes.add(currentRecipe)
+            changeRecipeStyle(holder,R.color.cardBackgroundLightColor,R.color.colorPrimary)
+            applyActionModeTitle()
+        }
+    }
+
+    private fun changeRecipeStyle(holder: MyViewHolder , backgroundColor : Int , strokeColor : Int){
+        holder.binding.apply {
+            favroiteRecipesRowLayout.setBackgroundColor(ContextCompat.getColor(requiredActivity,backgroundColor))
+            favoriteRowCardView.strokeColor = ContextCompat.getColor(requiredActivity,strokeColor)
+        }
+    }
+
+    private fun applyActionModeTitle() {
+        when(selectedRecipes.size) {
+            0 -> {
+                mActionMode.finish()
+            }
+            1 -> {
+                mActionMode.title = "${selectedRecipes.size} item selected"
+
+            }
+            else -> {
+                mActionMode.title = "${selectedRecipes.size} items selected"
+            }
+        }
+    }
 
     override fun onCreateActionMode(actionMode: ActionMode?, menu: Menu?): Boolean {
         actionMode?.menuInflater?.inflate(R.menu.favorites_contextual_menu,menu)
+        mActionMode = actionMode!!
         applyStatusBarColor(R.color.contextualStatusBarColor)
 
         return true
@@ -83,11 +145,25 @@ class FavoriteRecipesAdapter(
     }
 
     override fun onActionItemClicked(actionMode: ActionMode?, menu: MenuItem?): Boolean {
+        if (menu?.itemId == R.id.delete_favorite_recipe_menu) {
+            selectedRecipes.forEach {
+                mainViewModel.deleteFavoriteRecipes(it)
+            }
+            showSnackBar("${selectedRecipes.size} Recipe/s removed.")
+            multiSelection = false
+            selectedRecipes.clear()
+            actionMode?.finish()
+        }
         return true
 
     }
 
     override fun onDestroyActionMode(actionMode: ActionMode?) {
+        myViewHolder.forEach { holder ->
+            changeRecipeStyle(holder,R.color.cardBackgroundColor,R.color.strokeColor)
+        }
+        multiSelection = false
+        selectedRecipes.clear()
         applyStatusBarColor(R.color.statusBarColor)
     }
 
@@ -102,6 +178,20 @@ class FavoriteRecipesAdapter(
         val diffUtilResult = DiffUtil.calculateDiff(recipesDiffUtil)
         favoriteRecipes = newFavoritesEntity
         diffUtilResult.dispatchUpdatesTo(this)
+    }
+
+    private fun showSnackBar(message : String) {
+        Snackbar.make(
+            rootView,
+            message,
+            Snackbar.LENGTH_SHORT
+        ).setAction("Okay"){}.show()
+    }
+
+    fun clearContextualActionMode(){
+        if (this::mActionMode.isInitialized) {
+            mActionMode.finish()
+        }
     }
 
 }

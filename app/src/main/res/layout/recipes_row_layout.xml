@@ -69,7 +69,6 @@
                     android:layout_marginTop="6dp"
                     android:ellipsize="end"
                     android:maxLines="3"
-                    android:text="@{result.summary}"
                     parseHtml="@{result.summary}"
                     android:textColor="@color/black"
                     app:layout_constraintEnd_toEndOf="@+id/favoriteTxtTitle"

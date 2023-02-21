@@ -147,7 +147,7 @@ class RecipesFragment : Fragment(),SearchView.OnQueryTextListener {
     private fun searchApiData(searchQuery : String) {
         showShimmerEffect()
         mainViewModel.searchRecipes(recipesViewModel.applySearchQuery(searchQuery))
-        mainViewModel.searchRepicesResponse.observe(viewLifecycleOwner) { response ->
+        mainViewModel.searchRecipesResponse.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is NetworkResult.Success -> {
                     hideShimmerEffect()
