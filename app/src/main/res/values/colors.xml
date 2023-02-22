@@ -7,9 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="medium_gray">#D1D1D1</color>
-    <color name="light_medium_gray">#80D1D1D1</color>
-
     <color name="colorPrimary">#6200EA</color>
     <color name="colorPrimaryDark">#5502C8</color>
     <color name="colorAccent">#9D46FF</color>
@@ -23,6 +20,7 @@
     <color name="red">#FF4646</color>
     <color name="yellow">#FFC114</color>
     <color name="green">#00C980</color>
+
     <!-- LIGHT THEME -->
 
     <color name="backgroundColor">@color/lightGray</color>
@@ -51,4 +49,5 @@
     <color name="bottomNavBackground">@color/white</color>
     <color name="bottomNavItemColor">@color/darkGray</color>
     <color name="bottomNavCheckedItemColor">@color/colorPrimary</color>
+
 </resources>
