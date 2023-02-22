@@ -1,6 +1,7 @@
 package com.myu.myufoodrecipes.data.database
 
 import com.myu.myufoodrecipes.data.database.entities.FavoritesEntity
+import com.myu.myufoodrecipes.data.database.entities.FoodJokeEntity
 import com.myu.myufoodrecipes.data.database.entities.RecipesEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -16,11 +17,19 @@ class LocalDataSource @Inject constructor(
         recipesDao.insertFavoriteRecipe(favoritesEntity)
     }
 
+    suspend fun insertFoodJoke(foodJokeEntity: FoodJokeEntity) {
+        recipesDao.insertFoodJoke(foodJokeEntity)
+    }
+
+    fun readFoodJoke () : Flow<List<FoodJokeEntity>> {
+        return recipesDao.readFoodJoke()
+    }
+
     fun readFavoriteRecipes() : Flow<List<FavoritesEntity>>{
         return recipesDao.readFavoriteRecipe()
     }
 
-    fun readRecipes() : kotlinx.coroutines.flow.Flow<List<RecipesEntity>> {
+    fun readRecipes() : Flow<List<RecipesEntity>> {
         return recipesDao.readRecipes()
     }
 
