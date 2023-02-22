@@ -81,7 +81,7 @@ class RecipesFragment : Fragment(),SearchView.OnQueryTextListener {
             }
         }
 
-        lifecycleScope.launch{
+        lifecycleScope.launchWhenStarted{
             networkListener = NetworkListener()
             networkListener.checkNetworkAvailability(requireContext())
                 .collect{ status ->
@@ -127,6 +127,7 @@ class RecipesFragment : Fragment(),SearchView.OnQueryTextListener {
                     response.data?.let {
                         mAdapter.setData(it)
                     }
+                    recipesViewModel.saveMealAndDietType()
                 }
                 is NetworkResult.Error -> {
                     hideShimmerEffect()

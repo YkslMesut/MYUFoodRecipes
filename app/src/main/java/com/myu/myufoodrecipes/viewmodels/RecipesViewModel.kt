@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.myu.myufoodrecipes.data.DataStoreRepository
+import com.myu.myufoodrecipes.data.MealAndDietType
 import com.myu.myufoodrecipes.util.Constants
 import com.myu.myufoodrecipes.util.Constants.Companion.DEFAULT_DIET_TYPE
 import com.myu.myufoodrecipes.util.Constants.Companion.DEFAULT_MEAL_TYPE
@@ -19,7 +20,6 @@ import com.myu.myufoodrecipes.util.Constants.Companion.QUERY_SEARCH
 import com.myu.myufoodrecipes.util.Constants.Companion.QUERY_TYPE
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,37 +36,52 @@ private val dataStoreRepository: DataStoreRepository) : AndroidViewModel(applica
     val readMealAndDietType = dataStoreRepository.readMealAndDietType
     val readBackOnline = dataStoreRepository.readBackOnline.asLiveData()
 
+    private lateinit var mealAndDietType: MealAndDietType
+
     fun saveBackOnline(backOnline : Boolean) = viewModelScope.launch {
         dataStoreRepository.saveBackOnline(backOnline)
     }
 
-    fun saveMealAndDietType(
-        mealType : String,
-        mealTypeId : Int,
-        dietType : String,
-        dietTypeId : Int
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        dataStoreRepository.saveMealAndDietType(
-            mealType,mealTypeId,dietType,dietTypeId
-        )
-    }
-
-    fun applyQueries() : HashMap<String,String> {
-
-        viewModelScope.launch {
-            readMealAndDietType.collectLatest { value ->
-                mealType = value.selectedMealType
-                dietType = value.selectedDietType
+    fun saveMealAndDietType() =
+        viewModelScope.launch(Dispatchers.IO) {
+            if (this@RecipesViewModel::mealAndDietType.isInitialized) {
+                dataStoreRepository.saveMealAndDietType(
+                    mealAndDietType.selectedMealType,
+                    mealAndDietType.selectedMealTypeId,
+                    mealAndDietType.selectedDietType,
+                    mealAndDietType.selectedDietTypeId
+                )
             }
         }
+
+    fun saveMealAndDietTypeTemp(
+        mealType: String,
+        mealTypeId: Int,
+        dietType: String,
+        dietTypeId: Int
+    ) {
+        mealAndDietType = MealAndDietType(
+            mealType,
+            mealTypeId,
+            dietType,
+            dietTypeId
+        )
+    }
+    fun applyQueries() : HashMap<String,String> {
 
         val queries : HashMap<String,String> = HashMap()
         queries[QUERY_NUMBER] = DEFAULT_RECIPES_NUMBER
         queries[QUERY_API_KEY] = Constants.API_KEY
-        queries[QUERY_TYPE] = mealType
-        queries[QUERY_DIET] = dietType
         queries[QUERY_ADD_RECIPE_INFORMATION] = "true"
         queries[QUERY_FILL_INGREDIENTS] = "true"
+
+        if (this@RecipesViewModel::mealAndDietType.isInitialized) {
+            queries[QUERY_TYPE] = mealAndDietType.selectedMealType
+            queries[QUERY_DIET] = mealAndDietType.selectedDietType
+        } else {
+            queries[QUERY_TYPE] = DEFAULT_MEAL_TYPE
+            queries[QUERY_DIET] = DEFAULT_DIET_TYPE
+        }
 
         return queries
     }

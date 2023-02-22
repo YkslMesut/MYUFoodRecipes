@@ -90,8 +90,7 @@
                     android:id="@+id/favorite_heart_textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="100"
-                    setNumberOfResult="@{favoritesEntity.result.aggregateLikes}"
+                    android:text="@{String.valueOf(favoritesEntity.result.aggregateLikes)}"
                     android:textAlignment="center"
                     app:layout_constraintStart_toStartOf="@+id/favoriteTxtDescription"
                     app:layout_constraintTop_toBottomOf="@+id/favorite_title_imageView" />
@@ -114,8 +113,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:textAlignment="center"
-                    setNumberOfResult="@{favoritesEntity.result.readyInMinutes}"
-                    android:text="100"
+                    android:text="@{String.valueOf(favoritesEntity.result.readyInMinutes)}"
                     app:layout_constraintStart_toEndOf="@+id/favorite_heart_textView"
                     app:layout_constraintTop_toBottomOf="@+id/favorite_clock_imageView" />
 
