@@ -27,7 +27,7 @@ class MainViewModel @Inject constructor(
 
     val readRecipes : LiveData<List<RecipesEntity>> = repository.local.readRecipes().asLiveData()
     val readFavoriteRecipes : LiveData<List<FavoritesEntity>> = repository.local.readFavoriteRecipes().asLiveData()
-    val readFodJoke : LiveData<List<FoodJokeEntity>> = repository.local.readFoodJoke().asLiveData()
+    val readFoodJoke: LiveData<List<FoodJokeEntity>> = repository.local.readFoodJoke().asLiveData()
 
     private fun insertRecipes(recipesEntity: RecipesEntity) = viewModelScope.launch(Dispatchers.IO) {
         repository.local.insertRecipes(recipesEntity)
@@ -97,10 +97,10 @@ class MainViewModel @Inject constructor(
                 if (foodJoke != null)
                     offlineCacheFoodJoke(foodJoke)
             } catch (e : java.lang.Exception) {
-                recipesResponse.value = NetworkResult.Error(e.message)
+                foodJokeResponse.value = NetworkResult.Error(e.message)
             }
         } else {
-            recipesResponse.value = NetworkResult.Error("No Internet Connection.")
+            foodJokeResponse.value = NetworkResult.Error("No Internet Connection.")
         }
 
     }
